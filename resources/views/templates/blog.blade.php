@@ -2,7 +2,7 @@
 
 @section('main')
 
-    <main class="container mx-auto px-5 flex flex-grow">
+    <main class="container mx-auto px-5 flex flex-grow ">
         <div class="w-full grid grid-cols-4 gap-10">
             <div class="md:col-span-3 col-span-4">
                 <div id="posts" class=" px-3 lg:px-7 py-6">

@@ -17,11 +17,12 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->boolean('status')->default(true);
             $table->string('password');
-            $table->enum('role',UserRoleEnum::values());
+            $table->enum('role', UserRoleEnum::values());
             $table->string('avatar')->default('images/avatar.jpg');
             $table->rememberToken();
             $table->timestamps();
         });
+
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();

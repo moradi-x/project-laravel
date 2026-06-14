@@ -32,6 +32,7 @@ class User extends Authenticatable
 
 
     protected $casts = [
+        // برای تبدیل داده ای 
         'password' => 'hashed',
         'role' => UserRoleEnum::class,
         'status' => 'boolean'
