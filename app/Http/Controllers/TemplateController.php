@@ -33,6 +33,7 @@ class TemplateController extends Controller
             'randomPosts' => $randomPosts
         ]);
     }
+
     
     public function blog(Request $request)
     {
@@ -48,6 +49,8 @@ class TemplateController extends Controller
             'posts' => $posts,
         ]);
     } 
+
+
     
     public function category(Category $category, Request $request)
     {
