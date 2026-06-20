@@ -26,14 +26,17 @@ class AuthController extends Controller
         ]);
 
         if (!Auth::attempt($data)) {
+            // ایمبل و رمز رو در دیتا بیس چک میکنه درست بود در سشن اجازه لاگین میده
             throw ValidationException::withMessages([
                 'email' => ['Invalid credential'],
+                // قرمز ارور بده که همچین کاربری نداریم
             ]);
         }
 
         $user = Auth::user();
 
         if (!$user->status) {
+            //  اگر استاتوس کاربر فالس هست لاگ اوتش کن
             Auth::logout();
             throw ValidationException::withMessages([
                 'email' => ['your accent id inactive'],
@@ -41,6 +44,7 @@ class AuthController extends Controller
         }
 
         return Redirect::route('dashbord');
+        // ریدایرکت کرده چون میخواد به کنترل هایی دیگه در اون روت بره نه اینکه فقط اینجا ویو میک کنه
     }
 
     public function register()
@@ -105,3 +109,4 @@ class AuthController extends Controller
         return Redirect::route('login');
     } 
 }
+ 

@@ -27,14 +27,14 @@ class TemplateController extends Controller
             ->orderBy('created_at', 'DESC')
             ->take(3)
             ->get();
-            
+
         return View::make('templates.home', [
             'posts' => $posts,
             'randomPosts' => $randomPosts
         ]);
     }
 
-    
+
     public function blog(Request $request)
     {
         $order = ($request->filled('order') and in_array($request->order,  ['desc', 'asc'])) ? $request->order : 'desc';
@@ -48,10 +48,8 @@ class TemplateController extends Controller
         return View::make('templates.blog', [
             'posts' => $posts,
         ]);
-    } 
+    }
 
-
-    
     public function category(Category $category, Request $request)
     {
         $order = ($request->filled('order') and in_array($request->order,  ['desc', 'asc'])) ? $request->order : 'desc';
@@ -67,6 +65,7 @@ class TemplateController extends Controller
 
         ]);
     }
+
 
     public function search(Request $request)
     {
@@ -87,11 +86,13 @@ class TemplateController extends Controller
             ->orderBy('create_at',  $order)
             ->paginate(9)
             ->withQueryString();
+        //  این ویچ کویری استرینگ  برای سرچ توی پیج اینیت هست
 
         return View::make('templates.search', [
             'posts' => $posts
         ]);
     }
+
 
     public function single(string $slug)
     {
@@ -108,6 +109,7 @@ class TemplateController extends Controller
         ]);
     }
 
+
     public function comment(int $id, Request $request)
     {
 
@@ -121,12 +123,12 @@ class TemplateController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
-        $data['status'] = CommentStatusEnum::PENDING ;
+        $data['status'] = CommentStatusEnum::PENDING;
 
         $post->comments()->create($data);
 
-        return Redirect::back()->with('message', "Comment was posted and show after accept by admin")
+        return Redirect::back()
+            ->with('message', "Comment was posted and show after accept by admin")
             ->withFragment('comment');
     }
-
 }

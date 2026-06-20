@@ -22,7 +22,7 @@ class PostController extends Controller
                 return $query->where('title', 'like', "%{$request->search}%")
                     ->orWhere('content', 'like', "%{$request->search}%");
             })
-            ->when($request->has('trash'), fn($query) => $query->onlyTrashed() )
+            ->when($request->has('trash'), fn($query) => $query->onlyTrashed())
             ->withCount('comments')
             ->orderBy('created_at', 'DESC')
             ->paginate(10)
@@ -49,24 +49,25 @@ class PostController extends Controller
             'categories' => ['required', 'array'],
             'categories.*' => ['exists:categories,id'],
             'status' => ['required', 'in:active,inactive'],
-            'thumbnail' => ['required', 'image'],
+            'thumbnail' => ['required', 'image'], // مرحله اول اعتبار سنجی
         ]);
 
         $slug = Str::slug($data['title']);
         if (Post::where('slug', $slug)->count())
             $slug = $slug . "-" . uniqid();
 
+
+        $thumbnail = $data['thumbnail']->store();  // مرحله دوم ذخیره عکس در پوشه استوریج . اپ . پاپلیک
+
+
         /**  @var User  */
-
-        $thumbnail = $data['thumbnail']->store();
-
         $user = Auth::user();
         $post =  $user->posts()->create([
             'title' => $data['title'],
             'slug' => $slug,
             'content' => $data['content'],
             'status' => $data['status'] == 'active' ? true : false,
-            'thumbnail' => "storage/{$thumbnail}" ,
+            'thumbnail' => "storage/{$thumbnail}",  // مرحله سوم ذخیره مسیر در دیتابیس
         ]);
 
         $post->categories()->attach($data['categories']);
@@ -95,23 +96,25 @@ class PostController extends Controller
             'categories' => ['required', 'array'],
             'categories.*' => ['exists:categories,id'],
             'status' => ['required', 'in:active,inactive'],
-            'thumbnail' => ['nullable', 'image'],
+            'thumbnail' => ['nullable', 'image'], // مرحله اول  اعبار سنجی
 
         ]);
 
         $slug = Str::slug($data['title']);
 
         if (Post::where('slug', $slug)->where('id', '<>', $post->id)->count()) {
-            $slug = $slug . "-" . uniqid();
+            $slug = $slug . "-" . uniqid();  // برای اینکه تایتل خود اون پست رو نبینن
         }
 
-        $thumbnail = $post->thumbnail ;
-        
+        $thumbnail = $post->thumbnail;
+         // نگه داشتن عکس قبلی و اگر شرط پایین اجرا نشه این اجرا میشه
+
         // dd($thumbnail);
 
-        if(isset($data['thumbnail'])){
-           $thumbnail = "storage/" . $data['thumbnail']->store();
-           Storage::disk('public')->delete(Str::of($post->thumbnail)->replace('storage/',''));
+        if (isset($data['thumbnail'])) {
+            $thumbnail = "storage/" . $data['thumbnail']->store(); // ذخیره عکس جدید در پوشه استوریج . اپ . پابلیک
+            Storage::disk('public')->delete(Str::of($post->thumbnail)->replace('storage/', ''));
+            // عکس قبلی رو حذف و جایگزینش کن با عکس جدید
         }
 
         $post->update([
@@ -119,7 +122,7 @@ class PostController extends Controller
             'slug' => $slug,
             'content' => $data['content'],
             'status' => $data['status'] == 'active' ? true : false,
-            'thumbnail' => $thumbnail 
+            'thumbnail' => $thumbnail
         ]);
 
         $post->categories()->sync($data['categories']);
@@ -135,10 +138,11 @@ class PostController extends Controller
         return Redirect::back()->with('message', "post `{$post->title}` has been delete");
     }
 
-    public function change(Post $post){
-        $post->status = !$post->status ;
+    public function change(Post $post)
+    {
+        $post->status = !$post->status;
         $post->save();
 
-        return Redirect::back()->with('message', "post `{$post->title}` has been change"); 
+        return Redirect::back()->with('message', "post `{$post->title}` has been change");
     }
 }
