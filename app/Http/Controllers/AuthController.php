@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\UserRoleEnum;
+use App\Jobs\ResizeAvatarJob;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -95,7 +96,9 @@ class AuthController extends Controller
         }
 
         if (isset($data['avatar'])) {
-            $user->avatar = 'storage/' . $data['avatar']->storeAs('avatar', md5($user->email) . '.jpg');
+            $user->avatar = 'storage/' . $data['avatar']->storeAs('avatar', md5($user->email) . '.png');
+
+            ResizeAvatarJob::dispatch($user);
         }
         $user->save();
         return redirect()->back()->with('message', "you profile has been updated.");

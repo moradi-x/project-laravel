@@ -11,3 +11,4 @@ enum CommentStatusEnum :string
     case PENDING = 'pending' ;
     case BLOCK = 'block';
 }
+
