@@ -35,6 +35,39 @@ window.deleteitem = function (id, title) {
   });
 }
 
+window.restoreItem = function (id, title) {
+  Swal.fire({
+    title: "Are you sure?",
+    text: `You are restoring \`${title}\` .`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, restore it!"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const item = document.querySelector('#restore-item-' + id);
+      item.submit();
+    }
+  });
+}
+window.forceDeleteItem = function (id, title) {
+  Swal.fire({
+    title: "Are you sure?",
+    text: `You are force deleteing \`${title}\` .`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, force delete it!"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const item = document.querySelector('#force-Delete-item-' + id);
+      item.submit();
+    }
+  });
+}
+
 window.changeitem = function (id, title) {
   Swal.fire({
     title: "Are you sure?",
@@ -52,19 +85,19 @@ window.changeitem = function (id, title) {
   });
 }
 
-window.resetitem = function (id, title) {
-  Swal.fire({
-    title: "Are you sure?",
-    text: `You are reseting Password for \`${title}\` .`,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Yes, resete it!"
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const item = document.querySelector('#reset-item-' + id);
-      item.submit();
-    }
-  });
-}
+// window.restoreitem = function (id, title) {
+//   Swal.fire({
+//     title: "Are you sure?",
+//     text: `You are reseting Password for \`${title}\` .`,
+//     icon: "warning",
+//     showCancelButton: true,
+//     confirmButtonColor: "#3085d6",
+//     cancelButtonColor: "#d33",
+//     confirmButtonText: "Yes, resete it!"
+//   }).then((result) => {
+//     if (result.isConfirmed) {
+//       const item = document.querySelector('#resetore-item-' + id);
+//       item.submit();
+//     }
+//   });
+// }

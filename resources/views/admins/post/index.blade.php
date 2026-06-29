@@ -69,29 +69,67 @@
                                     </td>
                                     <td class="py-3 px-4 border-b">{{ $post->created_at->format('d M Y - l | H:m') }}
                                     </td>
+                                                                            <td class=" flex py-3 px-4 border-b text-right space-x-2 ">
 
-                                    <td class="py-3 px-4 border-b text-right ">
-                                        <div class="flex justify-end space-x-2">
-                                            <a href="{{ route('post.edit', ['post' => $post->id]) }}"
-                                                class=" text-blue-500 hover:underline">Edit</a>
-                                            <button type="button"
-                                                onclick="deleteitem({{ $post->id }}, '{{ $post->title }}')"
-                                                class="text-red-500 hover:underline cursor-pointer">Delete</button>
-                                            <form id="delete-item-{{ $post->id }}"
-                                                action="{{ route('post.destroy', ['post' => $post->id]) }}" method="POST">
-                                                @method('DELETE')
-                                                @csrf
-                                            </form>
+                                    @if (request('trash'))
 
-                                            <button type="button"
-                                                onclick="changeitem({{ $post->id }}, '{{ $post->title }}')"
-                                                class="text-cyan-500 hover:underline cursor-pointer">Change</button>
-                                            <form id="change-item-{{ $post->id }}"
-                                                action="{{ route('post.change', ['post' => $post->id]) }}" method="POST">
-                                                @method('patch')
-                                                @csrf
-                                            </form>
-                                        </div>
+                                            @can('restore', $post)
+                                                <button type="button"
+                                                    onclick="restoreItem({{ $post->id }}, '{{ $post->title }}')"
+                                                    class="text-green-500 hover:underline cursor-pointer">Restore</button>
+
+                                                <form id="restore-item-{{ $post->id }}"
+                                                    action="{{ route('post.restore', ['post' => $post->id]) }}" method="POST">
+                                                    @method('PATCH')
+                                                    @csrf
+                                                </form>
+                                            @endcan
+
+                                            @can('forceDelete', $post)
+                                                <button type="button"
+                                                    onclick="forceDeleteItem({{ $post->id }}, '{{ $post->title }}')"
+                                                    class="text-red-500 hover:underline cursor-pointer">Force Delete</button>
+
+                                                <form id="force-Delete-item-{{ $post->id }}"
+                                                    action="{{ route('post.force.delete', ['post' => $post->id]) }}"
+                                                    method="POST">
+                                                    @method('DELETE')
+                                                    @csrf
+                                                </form>
+                                            @endcan
+                                        @else
+                                            <div class="flex justify-end space-x-2">
+                                                @can('update', $post)
+                                                    <a href="{{ route('post.edit', ['post' => $post->id]) }}"
+                                                        class=" text-blue-500 hover:underline">Edit</a>
+                                                @endcan
+
+                                                @can('delete', $post)
+                                                    <button type="button"
+                                                        onclick="deleteitem({{ $post->id }}, '{{ $post->title }}')"
+                                                        class="text-red-500 hover:underline cursor-pointer">Delete</button>
+
+                                                    <form id="delete-item-{{ $post->id }}"
+                                                        action="{{ route('post.destroy', ['post' => $post->id]) }}"
+                                                        method="POST">
+                                                        @method('DELETE')
+                                                        @csrf
+                                                    </form>
+                                                @endcan
+                                                @can('change', $post)
+                                                    <button type="button"
+                                                        onclick="changeitem({{ $post->id }}, '{{ $post->title }}')"
+                                                        class="text-cyan-500 hover:underline cursor-pointer">Change</button>
+
+                                                    <form id="change-item-{{ $post->id }}"
+                                                        action="{{ route('post.change', ['post' => $post->id]) }}"
+                                                        method="POST">
+                                                        @method('patch')
+                                                        @csrf
+                                                    </form>
+                                                @endcan
+                                            </div>
+                                    @endif
 
                                     </td>
                                 </tr>

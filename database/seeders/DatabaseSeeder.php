@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'status' => true ,
+            'status' => true,
             'role' => UserRoleEnum::ADMIN
         ]);
 
@@ -40,9 +40,9 @@ class DatabaseSeeder extends Seeder
 
         Post::factory(50)
             ->create()
-            ->each( fn($post) =>
-             $post->categories()
-            ->attach(Arr::random($allCategories, random_int(2, 6))));
+            ->each(fn($post) =>
+            $post->categories()
+                ->attach(Arr::random($allCategories, random_int(2, 6))));
 
 
         Comment::factory(50)->create();

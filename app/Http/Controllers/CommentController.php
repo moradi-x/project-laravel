@@ -5,12 +5,18 @@ namespace App\Http\Controllers;
 use App\Enums\CommentStatusEnum;
 use App\Models\Comment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\View;
 use Illuminate\Validation\Rule;
 
 class CommentController extends Controller
 {
+
+    public function __construct()
+    {
+        Gate::authorize('admin');
+    }
     public function index(Request $request)
     {
         $comments = Comment::orderBy('created_at', 'DESC')
@@ -25,6 +31,7 @@ class CommentController extends Controller
 
     public function edit(Comment $comment)
     {
+        // Gate::authorize('admin');
         $comment->load('post');
 
         return View::make('admins.comment.edit', [
@@ -46,7 +53,7 @@ class CommentController extends Controller
         $comment->update($data);
 
         return Redirect::route('comment.index')
-        ->with('meesage', "Comment `{$comment->name}` has been edited. ");
+            ->with('meesage', "Comment `{$comment->name}` has been edited. ");
     }
 
     public function destroy(Comment $comment)
@@ -54,6 +61,6 @@ class CommentController extends Controller
         $comment->delete();
 
         return Redirect::back()
-        ->with('meesage', "Comment `{$comment->name}` has been deleted ");
+            ->with('meesage', "Comment `{$comment->name}` has been deleted ");
     }
 }

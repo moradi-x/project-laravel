@@ -5,10 +5,15 @@ namespace App\Http\Controllers;
 use App\Enums\CommentStatusEnum;
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\User;
+use App\Notifications\CommentNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\View;
+use Illuminate\Validation\ValidationException;
 
 class TemplateController extends Controller
 {
@@ -116,8 +121,23 @@ class TemplateController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'min:3', 'max:50'],
             'email' => ['required', 'email', 'string', 'max:100'],
-            'comment' => ['required', 'string', 'min:3', 'max:10000']
+            'comment' => ['required', 'string', 'min:3', 'max:10000'],
+            'captcha' => ['required', 'captcha']
         ]);
+
+
+        $throttlekey = $request->ip;
+
+        if (RateLimiter::tooManyAttempts($throttlekey, 2)) {
+            throw ValidationException::withMessages([
+                'name' => [__('too many login attempts . please try again in :seconds seconds. ', [
+                    'seconds' => RateLimiter::availableIn($throttlekey)
+                ])],
+            ]);
+        }
+
+        RateLimiter::hit($throttlekey, 60);
+
 
         $post = Post::where('status', true)
             ->where('id', $id)
@@ -125,7 +145,9 @@ class TemplateController extends Controller
 
         $data['status'] = CommentStatusEnum::PENDING;
 
-        $post->comments()->create($data);
+        $comment = $post->comments()->create($data);
+        $user = User::find(1);
+        Notification::send($user,new CommentNotification($comment)); 
 
         return Redirect::back()
             ->with('message', "Comment was posted and show after accept by admin")

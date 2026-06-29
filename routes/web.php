@@ -34,6 +34,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::put('post/{post}', [PostController::class, 'update'])->name('post.update');
     Route::delete('post/{post}', [PostController::class, 'destroy'])->name('post.destroy');
     Route::patch('post/{post}', [PostController::class, 'change'])->name('post.change');
+    Route::delete('post/{post}/force', [PostController::class, 'forcedelete'])->name('post.force.delete');
+    Route::patch('post/{post}/restore', [PostController::class, 'restore'])->name('post.restore');
 
 
     Route::get('category', [CategoryController::class, 'index'])->name('category.index');

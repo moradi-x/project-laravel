@@ -7,8 +7,10 @@ use App\Jobs\ResizeAvatarJob;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -26,13 +28,27 @@ class AuthController extends Controller
             'password' => ['required', 'min:6', 'string']
         ]);
 
+        $throttlekey = Str::lower($request->input('email')) . '|' . $request->ip ;
+
+        if (RateLimiter::tooManyAttempts($throttlekey , 5)) {
+            throw ValidationException::withMessages([
+                'email' => [__('too many login attempts . please try again in :seconds seconds. ',[
+                    'seconds' => RateLimiter::availableIn($throttlekey)
+                ])],
+                ]);
+        }
+
+        
         if (!Auth::attempt($data)) {
+            RateLimiter::hit($throttlekey);
             // ایمبل و رمز رو در دیتا بیس چک میکنه درست بود در سشن اجازه لاگین میده
             throw ValidationException::withMessages([
                 'email' => ['Invalid credential'],
                 // قرمز ارور بده که همچین کاربری نداریم
             ]);
         }
+
+        RateLimiter::clear($throttlekey); 
 
         $user = Auth::user();
 

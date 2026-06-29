@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string("email");
             $table->text("comment");
             $table->enum("status" , CommentStatusEnum::values()) ;
-            $table->foreignIdFor( Post::class)->constrained();
+            $table->foreignIdFor( Post::class)->constrained()->onDelete('cascade') ;
             $table->timestamps();
         });
     }

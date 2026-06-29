@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePostRequest;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
@@ -17,12 +19,17 @@ class PostController extends Controller
     public function index(Request $request)
     {
 
+        /** @var  User */
+        $user = Auth::user();
+        Gate::authorize('viewAny', Post::class);
+
         $posts = Post::with('categories', 'user')
             ->where(function ($query) use ($request) {
                 return $query->where('title', 'like', "%{$request->search}%")
                     ->orWhere('content', 'like', "%{$request->search}%");
             })
             ->when($request->has('trash'), fn($query) => $query->onlyTrashed())
+            ->when($user->isUser(), fn($query) => $query->where('user_id' , $user->id  ))
             ->withCount('comments')
             ->orderBy('created_at', 'DESC')
             ->paginate(10)
@@ -35,22 +42,31 @@ class PostController extends Controller
 
     public function create()
     {
+        Gate::authorize('create', Post::class);
+
         $categories = Category::all('id', 'name');
         return view::make('admins.post.create', [
             'categories' => $categories
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        $data = $request->validate([
-            'title' => ['required', 'string', 'min:3', 'max:200'],
-            'content' => ['required', 'string', 'min:3', 'max:100000'],
-            'categories' => ['required', 'array'],
-            'categories.*' => ['exists:categories,id'],
-            'status' => ['required', 'in:active,inactive'],
-            'thumbnail' => ['required', 'image'], // مرحله اول اعتبار سنجی
-        ]);
+        // Gate::authorize('create', Post::class);
+        // در فایل ریکوس گذاشتیم جایگذینش را
+
+
+        $data = $request->validated();
+        //  این گد بالا مربوط به فایل ریکویس هست اونجا روب هارو گذاشتیم
+
+        // $data = $request->validate([
+        //     'title' => ['required', 'string', 'min:3', 'max:200'],
+        //     'content' => ['required', 'string', 'min:3', 'max:100000'],
+        //     'categories' => ['required', 'array'],
+        //     'categories.*' => ['exists:categories,id'],
+        //     'status' => ['required', 'in:active,inactive'],
+        //     'thumbnail' => ['required', 'image'], // مرحله اول اعتبار سنجی
+        // ]);
 
         $slug = Str::slug($data['title']);
         if (Post::where('slug', $slug)->count())
@@ -78,6 +94,7 @@ class PostController extends Controller
 
     public function edit(Post $post)
     {
+        Gate::authorize('update', $post);
 
         $categories = Category::all('id', 'name');
         $post->load('categories');
@@ -90,6 +107,9 @@ class PostController extends Controller
 
     public function update(Post $post, Request $request)
     {
+        Gate::authorize('update', $post);
+
+
         $data = $request->validate([
             'title' => ['required', 'string', 'min:3', 'max:200'],
             'content' => ['required', 'string', 'min:3', 'max:100000'],
@@ -107,7 +127,7 @@ class PostController extends Controller
         }
 
         $thumbnail = $post->thumbnail;
-         // نگه داشتن عکس قبلی و اگر شرط پایین اجرا نشه این اجرا میشه
+        // نگه داشتن عکس قبلی و اگر شرط پایین اجرا نشه این اجرا میشه
 
         // dd($thumbnail);
 
@@ -133,6 +153,8 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
+        Gate::authorize('delete', $post);
+
         $post->delete();
 
         return Redirect::back()->with('message', "post `{$post->title}` has been delete");
@@ -140,9 +162,41 @@ class PostController extends Controller
 
     public function change(Post $post)
     {
+        Gate::authorize('change', $post);
+
+
         $post->status = !$post->status;
         $post->save();
 
         return Redirect::back()->with('message', "post `{$post->title}` has been change");
+    }
+
+    public function restore(int $id)
+    {
+        //  نمیتونی بایند بکنی چون حذف شده و در ترش هست
+
+        $post = Post::onlyTrashed()
+        ->where('id',$id)
+        ->firstOrFail();
+
+        Gate::authorize('restore', $post);
+
+        $post->restore();
+
+        return Redirect::back()->with('message', "post `{$post->title}` has been restored");
+    }
+
+    public function forcedelete(int $id)
+    {
+
+        $post = Post::onlyTrashed()
+        ->where('id',$id)
+        ->firstOrFail();
+
+        Gate::authorize('forcedelete', $post);
+
+        $post->forceDelete();
+
+        return Redirect::back()->with('message', "post `{$post->title}` has been forc Deleted");
     }
 }

@@ -4,11 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\View;
 
 class CategoryController extends Controller
 {
+
+    public function __construct()
+    {
+        Gate::authorize('admin');
+    }
+
     public function index(Request $request)
     {
         $categories = Category::orderBy('created_at', 'DESC')
