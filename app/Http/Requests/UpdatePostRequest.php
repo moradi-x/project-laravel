@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 
 class UpdatePostRequest extends FormRequest
 {
@@ -11,18 +12,19 @@ class UpdatePostRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return Gate::allows('update', $this->post);;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
+    
     public function rules(): array
     {
         return [
-            //
+            'title' => ['required', 'string', 'min:3', 'max:200'],
+            'content' => ['required', 'string', 'min:3', 'max:100000'],
+            'categories' => ['required', 'array'],
+            'categories.*' => ['exists:categories,id'],
+            'status' => ['required', 'in:active,inactive'],
+            'thumbnail' => ['nullable', 'image'], // مرحله اول  اعبار سنجی
         ];
     }
 }

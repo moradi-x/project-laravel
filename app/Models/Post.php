@@ -19,13 +19,14 @@ class Post extends Model
         'status',
         'content',
         'thumbnail',
-        'user_id',
+        'user_id', 
         'category_id',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+       
     } 
 
     public function categories(): BelongsToMany

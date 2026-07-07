@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
@@ -105,20 +106,22 @@ class PostController extends Controller
         ]);
     }
 
-    public function update(Post $post, Request $request)
+    public function update(Post $post, UpdatePostRequest $request)
     {
-        Gate::authorize('update', $post);
+        // Gate::authorize('update', $post);
 
 
-        $data = $request->validate([
-            'title' => ['required', 'string', 'min:3', 'max:200'],
-            'content' => ['required', 'string', 'min:3', 'max:100000'],
-            'categories' => ['required', 'array'],
-            'categories.*' => ['exists:categories,id'],
-            'status' => ['required', 'in:active,inactive'],
-            'thumbnail' => ['nullable', 'image'], // مرحله اول  اعبار سنجی
+        $data = $request->validated() ;
 
-        ]);
+        
+        // $data = $request->validate([
+        //     'title' => ['required', 'string', 'min:3', 'max:200'],
+        //     'content' => ['required', 'string', 'min:3', 'max:100000'],
+        //     'categories' => ['required', 'array'],
+        //     'categories.*' => ['exists:categories,id'],
+        //     'status' => ['required', 'in:active,inactive'],
+        //     'thumbnail' => ['nullable', 'image'], // مرحله اول  اعبار سنجی
+        // ]);
 
         $slug = Str::slug($data['title']);
 
