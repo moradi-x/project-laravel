@@ -14,29 +14,33 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\View;
 use Illuminate\Validation\ValidationException;
+use App\Actions\Template\HomePageAction;
 
 class TemplateController extends Controller
 {
-    public function home()
+    public function home(HomePageAction $action )
     {
+        $result = $action->handle();
+        
+        // $posts  = Post::where('status', true)
+        //     ->with('categories', 'user')
+        //     ->orderBy('created_at', 'DESC')
+        //     ->take(9)
+        //     ->get();
 
-        $posts  = Post::where('status', true)
-            ->with('categories', 'user')
-            ->orderBy('created_at', 'DESC')
-            ->take(9)
-            ->get();
+        // $randomPosts = Post::inRandomOrder()
+        //     ->with('user', 'categories')
+        //     ->where('status', true)
+        //     ->orderBy('created_at', 'DESC')
+        //     ->take(3)
+        //     ->get();
 
-        $randomPosts = Post::inRandomOrder()
-            ->with('user', 'categories')
-            ->where('status', true)
-            ->orderBy('created_at', 'DESC')
-            ->take(3)
-            ->get();
+        // return View::make('templates.home', [
+        //     'posts' => $posts,
+        //     'randomPosts' => $randomPosts
+        // ]);
 
-        return View::make('templates.home', [
-            'posts' => $posts,
-            'randomPosts' => $randomPosts
-        ]);
+        return View::make('templates.home',$result);
     }
 
 
