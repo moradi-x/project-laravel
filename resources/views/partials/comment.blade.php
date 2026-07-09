@@ -6,7 +6,7 @@
          <input type="hidden" id="message" value="{{ session('message') }}">
      @endif
 
-     <form action="{{ route('comment', ['post' => $post->id]) }}" method="POST">
+     <form action="{{ route('comment', ['post' => $post->slug]) }}" method="POST">
          @method('POST')
          @csrf
          <div class="grid grid-cols-2 gap-3 mb-3 ">
