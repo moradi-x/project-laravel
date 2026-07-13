@@ -35,7 +35,8 @@ class TemplateController extends Controller
         $result = $action->handle($request);
 
         return Response::json([
-            'posts' => PostCollection::collection($result['posts'])
+            // 'posts' => PostCollection::collection($result['posts'])
+            'posts' => new PostCollection($result['posts'])
         ]);
     }
 

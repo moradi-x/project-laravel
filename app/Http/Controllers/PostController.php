@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Panel\Post\IndexPostAction;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
+use App\Http\Resources\PostCollection;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
@@ -17,27 +19,15 @@ use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
-    public function index(Request $request)
+    public function index(IndexPostAction $action, Request $request)
     {
+        $result = $action->handle($request);
 
-        /** @var  User */
-        $user = Auth::user();
         Gate::authorize('viewAny', Post::class);
 
-        $posts = Post::with('categories', 'user')
-            ->where(function ($query) use ($request) {
-                return $query->where('title', 'like', "%{$request->search}%")
-                    ->orWhere('content', 'like', "%{$request->search}%");
-            })
-            ->when($request->has('trash'), fn($query) => $query->onlyTrashed())
-            ->when($user->isUser(), fn($query) => $query->where('user_id' , $user->id  ))
-            ->withCount('comments')
-            ->orderBy('created_at', 'DESC')
-            ->paginate(10)
-            ->withQueryString();
 
         return View::make('admins.post.index', [
-            'posts' => $posts
+            'posts' => PostCollection::make($result['posts'])
         ]);
     }
 
@@ -111,9 +101,9 @@ class PostController extends Controller
         // Gate::authorize('update', $post);
 
 
-        $data = $request->validated() ;
+        $data = $request->validated();
 
-        
+
         // $data = $request->validate([
         //     'title' => ['required', 'string', 'min:3', 'max:200'],
         //     'content' => ['required', 'string', 'min:3', 'max:100000'],
@@ -179,8 +169,8 @@ class PostController extends Controller
         //  نمیتونی بایند بکنی چون حذف شده و در ترش هست
 
         $post = Post::onlyTrashed()
-        ->where('id',$id)
-        ->firstOrFail();
+            ->where('id', $id)
+            ->firstOrFail();
 
         Gate::authorize('restore', $post);
 
@@ -193,8 +183,8 @@ class PostController extends Controller
     {
 
         $post = Post::onlyTrashed()
-        ->where('id',$id)
-        ->firstOrFail();
+            ->where('id', $id)
+            ->firstOrFail();
 
         Gate::authorize('forcedelete', $post);
 

@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Auth\AuthenticateAction;
+use App\Actions\Auth\RegisterUserAction;
 use App\Enums\UserRoleEnum;
+use App\Http\Requests\Auth\AuthenticateUserRequest;
+use App\Http\Requests\Auth\RegisterUserRequeset;
 use App\Jobs\ResizeAvatarJob;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -18,47 +22,21 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+
+        // dd(Auth::check(), Auth::user());
+
         return view::make('authenticates.login');
     }
 
-    public function authenticate(Request $request)
+    public function authenticate(AuthenticateAction $action, AuthenticateUserRequest $request)
     {
-        $data = $request->validate([
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'min:6', 'string']
-        ]);
 
-        $throttlekey = Str::lower($request->input('email')) . '|' . $request->ip ;
+        $data = $request->validated();
 
-        if (RateLimiter::tooManyAttempts($throttlekey , 5)) {
-            throw ValidationException::withMessages([
-                'email' => [__('too many login attempts . please try again in :seconds seconds. ',[
-                    'seconds' => RateLimiter::availableIn($throttlekey)
-                ])],
-                ]);
-        }
+        $throttlekey = Str::lower($request->input('email')) . '|' . $request->ip;
 
-        
-        if (!Auth::attempt($data)) {
-            RateLimiter::hit($throttlekey);
-            // ایمبل و رمز رو در دیتا بیس چک میکنه درست بود در سشن اجازه لاگین میده
-            throw ValidationException::withMessages([
-                'email' => ['Invalid credential'],
-                // قرمز ارور بده که همچین کاربری نداریم
-            ]);
-        }
+        $action->handle($data, $throttlekey, $request);
 
-        RateLimiter::clear($throttlekey); 
-
-        $user = Auth::user();
-
-        if (!$user->status) {
-            //  اگر استاتوس کاربر فالس هست لاگ اوتش کن
-            Auth::logout();
-            throw ValidationException::withMessages([
-                'email' => ['your accent id inactive'],
-            ]);
-        }
 
         return Redirect::route('dashbord');
         // ریدایرکت کرده چون میخواد به کنترل هایی دیگه در اون روت بره نه اینکه فقط اینجا ویو میک کنه
@@ -69,19 +47,11 @@ class AuthController extends Controller
         return View::make('authenticates.register');
     }
 
-    public function registerUser(Request $request)
+    public function registerUser(RegisterUserAction $action , RegisterUserRequeset $request)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'min:3 , max:50'],
-            'family' => ['required', 'string', 'min:3 , max:50'],
-            'email' => ['required', 'email', 'string', 'unique:users', 'max:100'],
-            'password' => ['required', 'string', 'min:6, max:100', 'confirmed'],
-        ]);
-        $data['status'] = true;
-        $data['role'] = UserRoleEnum::USER;
-
-        $user = User::create($data);
-        Auth::login($user);
+        $data = $request->validated();
+        $action->handle($data ,$request);
+        
         return Redirect::route('dashbord');
     }
 
@@ -126,6 +96,5 @@ class AuthController extends Controller
         Auth::logout();
 
         return Redirect::route('login');
-    } 
+    }
 }
- 
