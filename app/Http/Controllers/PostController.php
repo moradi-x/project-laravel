@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Panel\Post\ChangePostAction;
+use App\Actions\Panel\Post\DeletePostAction;
+use App\Actions\Panel\Post\ForceDeletePostAction;
 use App\Actions\Panel\Post\IndexPostAction;
+use App\Actions\Panel\Post\RestorePostAcrtion;
+use App\Actions\Panel\Post\StorePostAction;
+use App\Actions\Panel\Post\UpdatePostAction;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostCollection;
@@ -41,13 +47,17 @@ class PostController extends Controller
         ]);
     }
 
-    public function store(StorePostRequest $request)
+    public function store(StorePostAction $action, StorePostRequest $request)
     {
+
+
         // Gate::authorize('create', Post::class);
         // در فایل ریکوس گذاشتیم جایگذینش را
 
 
         $data = $request->validated();
+
+        $result = $action->handle($data);
         //  این گد بالا مربوط به فایل ریکویس هست اونجا روب هارو گذاشتیم
 
         // $data = $request->validate([
@@ -59,28 +69,10 @@ class PostController extends Controller
         //     'thumbnail' => ['required', 'image'], // مرحله اول اعتبار سنجی
         // ]);
 
-        $slug = Str::slug($data['title']);
-        if (Post::where('slug', $slug)->count())
-            $slug = $slug . "-" . uniqid();
 
-
-        $thumbnail = $data['thumbnail']->store();  // مرحله دوم ذخیره عکس در پوشه استوریج . اپ . پاپلیک
-
-
-        /**  @var User  */
-        $user = Auth::user();
-        $post =  $user->posts()->create([
-            'title' => $data['title'],
-            'slug' => $slug,
-            'content' => $data['content'],
-            'status' => $data['status'] == 'active' ? true : false,
-            'thumbnail' => "storage/{$thumbnail}",  // مرحله سوم ذخیره مسیر در دیتابیس
-        ]);
-
-        $post->categories()->attach($data['categories']);
 
         return Redirect::route('post.index')
-            ->with('message', "post ` {$post->title} ` has been created. ");
+            ->with('message', "post ` {$result['post']->title} ` has been created. ");
     }
 
     public function edit(Post $post)
@@ -96,13 +88,12 @@ class PostController extends Controller
         ]);
     }
 
-    public function update(Post $post, UpdatePostRequest $request)
+    public function update( UpdatePostAction $action ,Post $post, UpdatePostRequest $request)
     {
         // Gate::authorize('update', $post);
-
-
         $data = $request->validated();
 
+        $result = $action->handle($data ,$post) ;
 
         // $data = $request->validate([
         //     'title' => ['required', 'string', 'min:3', 'max:200'],
@@ -113,58 +104,27 @@ class PostController extends Controller
         //     'thumbnail' => ['nullable', 'image'], // مرحله اول  اعبار سنجی
         // ]);
 
-        $slug = Str::slug($data['title']);
-
-        if (Post::where('slug', $slug)->where('id', '<>', $post->id)->count()) {
-            $slug = $slug . "-" . uniqid();  // برای اینکه تایتل خود اون پست رو نبینن
-        }
-
-        $thumbnail = $post->thumbnail;
-        // نگه داشتن عکس قبلی و اگر شرط پایین اجرا نشه این اجرا میشه
-
-        // dd($thumbnail);
-
-        if (isset($data['thumbnail'])) {
-            $thumbnail = "storage/" . $data['thumbnail']->store(); // ذخیره عکس جدید در پوشه استوریج . اپ . پابلیک
-            Storage::disk('public')->delete(Str::of($post->thumbnail)->replace('storage/', ''));
-            // عکس قبلی رو حذف و جایگزینش کن با عکس جدید
-        }
-
-        $post->update([
-            'title' => $data['title'],
-            'slug' => $slug,
-            'content' => $data['content'],
-            'status' => $data['status'] == 'active' ? true : false,
-            'thumbnail' => $thumbnail
-        ]);
-
-        $post->categories()->sync($data['categories']);
-
         return Redirect::route('post.index')
-            ->with('message', "post `{$post->title}` has been update");
+            ->with('message', "post `{$result['post']->title}` has been update");
     }
 
-    public function destroy(Post $post)
+    public function destroy(DeletePostAction $action, Post $post)
     {
         Gate::authorize('delete', $post);
+        $action->handle($post);
 
-        $post->delete();
-
-        return Redirect::back()->with('message', "post `{$post->title}` has been delete");
+        return Redirect::back()->with('message', "post `{$post->title}` has been deleted");
     }
 
-    public function change(Post $post)
+    public function change(ChangePostAction $action, Post $post)
     {
         Gate::authorize('change', $post);
-
-
-        $post->status = !$post->status;
-        $post->save();
+        $action->handle($post);
 
         return Redirect::back()->with('message', "post `{$post->title}` has been change");
     }
 
-    public function restore(int $id)
+    public function restore(RestorePostAcrtion $action ,int $id)
     {
         //  نمیتونی بایند بکنی چون حذف شده و در ترش هست
 
@@ -174,12 +134,12 @@ class PostController extends Controller
 
         Gate::authorize('restore', $post);
 
-        $post->restore();
+        $result = $action->handle($post);
 
         return Redirect::back()->with('message', "post `{$post->title}` has been restored");
     }
 
-    public function forcedelete(int $id)
+    public function forcedelete(int $id, ForceDeletePostAction $action)
     {
 
         $post = Post::onlyTrashed()
@@ -188,7 +148,7 @@ class PostController extends Controller
 
         Gate::authorize('forcedelete', $post);
 
-        $post->forceDelete();
+        $result = $action->handle($post) ;
 
         return Redirect::back()->with('message', "post `{$post->title}` has been forc Deleted");
     }
