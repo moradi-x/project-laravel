@@ -1,22 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Actions\Panel\Comment\DeleteCommentAction;
 use App\Actions\Panel\Comment\IndexCommentAction;
 use App\Actions\Panel\Comment\UpdateCommentAction;
-use App\Enums\CommentStatusEnum;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateCommentlRequest;
+use App\Http\Resources\CommentCollection;
+use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\View;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Response;
 
 class CommentController extends Controller
 {
-
     public function __construct()
     {
         Gate::authorize('admin');
@@ -26,19 +25,9 @@ class CommentController extends Controller
     {
        $result = $action->handle($request);
 
-        return View::make('admins.Comment.index', [
-            'comments' => $result['comments']
+        return Response::json( [
+            'comments' => CommentCollection::make($result['comments'])
         ]);   
-    }
-
-    public function edit(Comment $comment)
-    {
-        // Gate::authorize('admin');
-        $comment->load('post');
-
-        return View::make('admins.comment.edit', [
-            'comment' => $comment
-        ]);
     }
 
     public function update(UpdateCommentAction $actionn, Comment $comment, UpdateCommentlRequest $request)
@@ -46,15 +35,21 @@ class CommentController extends Controller
         $data = $request->validated();
         $result = $actionn->handle($data , $comment);
 
-        return Redirect::route('comment.index')
-            ->with('meesage', "Comment `{$result['comment']->name}` has been Update. ");
+        return Response::json( [
+            'comment' => CommentResource::make($result['comment']),
+            'message' => "comment `{$result['comment']->name}` has been update"
+        ]); 
     }
 
     public function destroy(DeleteCommentAction $action,Comment $comment)
     {
 
         $resultl = $action->handle($comment);
-        return Redirect::back()
-            ->with('meesage', "Comment `{$comment->name}` has been deleted ");
+
+        return Response::json( [
+            'message' => "comment `{$comment->name}` has been delered"
+        ]); 
     }
+
+
 }

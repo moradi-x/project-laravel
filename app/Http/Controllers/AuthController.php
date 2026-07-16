@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Actions\Auth\AuthenticateAction;
 use App\Actions\Auth\RegisterUserAction;
+use App\Actions\Auth\UpdateProfileAction;
 use App\Enums\UserRoleEnum;
 use App\Http\Requests\Auth\AuthenticateUserRequest;
 use App\Http\Requests\Auth\RegisterUserRequeset;
+use App\Http\Requests\UpdateProfileRequest;
 use App\Jobs\ResizeAvatarJob;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -63,30 +65,12 @@ class AuthController extends Controller
         ]);
     }
 
-    public function updateprofile(Request $request)
+    public function updateprofile(UpdateProfileAction $action ,UpdateProfileRequest $request,)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'min:3', 'max:100'],
-            'family' => ['required', 'string', 'min:3', 'max:100'],
-            'avatar' => ['nullable', 'image'],
-            'password' => ['nullable', 'string', 'min:8', 'max:100', 'confirmed'],
-        ]);
-        /** @var User */
+        $data = $request->validated();
 
-        $user = Auth::user();
-        $user->name = $data['name'];
-        $user->family = $data['family'];
-
-        if (isset($data['password'])) {
-            $user->password = $data['password'];
-        }
-
-        if (isset($data['avatar'])) {
-            $user->avatar = 'storage/' . $data['avatar']->storeAs('avatar', md5($user->email) . '.png');
-
-            ResizeAvatarJob::dispatch($user);
-        }
-        $user->save();
+         $action->handle($data);
+       
         return redirect()->back()->with('message', "you profile has been updated.");
     }
 

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Panel\User\IndexUserAction;
 use App\Enums\UserRoleEnum;
 use App\Mail\SendPasswordMail;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\View;
@@ -13,17 +15,16 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    public function index(Request $request)
+
+    public function __construct()
+    {
+        Gate::authorize('admin');
+    }
+    
+    public function index(IndexUserAction $action , Request $request)
     {
 
-        $users = User::orderBy('created_at', 'DESC')
-            ->where(function ($query) use ($request) {
-                return $query->where('name', 'LIKE', "%{$request->search}%")
-                    ->orWhere('family', 'LIKE', "%{$request->search}%")
-                    ->orWhere('email', 'LIKE', "%{$request->search}%");
-            })
-            ->withCount('posts')
-            ->paginate(10);
+       $result = $action->handle($request);
 
         return View::make('admins.user.index', [
 
