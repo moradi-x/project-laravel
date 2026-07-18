@@ -87,20 +87,5 @@ class  AuthenticateAction
         return $user;
     }
 
-     /** @var User */
-
-        $user = Auth::user();
-        $user->name = $data['name'];
-        $user->family = $data['family'];
-
-        if (isset($data['password'])) {
-            $user->password = $data['password'];
-        }
-
-        if (isset($data['avatar'])) {
-            $user->avatar = 'storage/' . $data['avatar']->storeAs('avatar', md5($user->email) . '.png');
-
-            ResizeAvatarJob::dispatch($user);
-        }
-        $user->save();
+    
 }

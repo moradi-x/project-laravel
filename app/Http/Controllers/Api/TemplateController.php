@@ -6,10 +6,12 @@ use App\Actions\Template\BlogPageAction;
 use App\Actions\Template\CategoryPageAction;
 use App\Actions\Template\CreateCommentAction;
 use App\Actions\Template\HomePageAction;
+use App\Actions\Template\RecomandedTopicAction;
 use App\Actions\Template\SearchePageAction;
 use App\Actions\Template\SinglePageAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Template\StoreCommentRequest;
+use App\Http\Resources\CategoryCollection;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CommentResource;
 use App\Http\Resources\PostCollection;
@@ -84,4 +86,12 @@ class TemplateController extends Controller
             'message' =>  $result['message']
         ]) ;
     } 
+
+    public function topic(RecomandedTopicAction $action){
+        $result = $action->handle() ;
+
+        return Response::json([
+            'categories' => CategoryResource::collection($result['categories']),
+        ]) ;
+    }
 }

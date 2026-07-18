@@ -2,8 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Panel\User\ChangeUserAction;
+use App\Actions\Panel\User\DeleteUserAction;
 use App\Actions\Panel\User\IndexUserAction;
+use App\Actions\Panel\User\ResetUserAction;
+use App\Actions\Panel\User\StoreUserAction;
+use App\Actions\Panel\User\UpdateUserAction;
 use App\Enums\UserRoleEnum;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserCollection;
 use App\Mail\SendPasswordMail;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -20,15 +28,15 @@ class UserController extends Controller
     {
         Gate::authorize('admin');
     }
-    
-    public function index(IndexUserAction $action , Request $request)
+
+    public function index(IndexUserAction $action, Request $request)
     {
 
-       $result = $action->handle($request);
+        $result = $action->handle($request);
 
         return View::make('admins.user.index', [
 
-            'users' => $users
+            'users' => $result['users']
         ]);
     }
 
@@ -37,38 +45,27 @@ class UserController extends Controller
         return View::make('admins.user.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreUserAction $action, StoreUserRequest $request)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'min:3', 'max:100'],
-            'family' => ['required', 'string', 'min:3', 'max:100'],
-            'email' => ['required', 'email', 'max:100', 'unique:users,email'],
-            'status' => ['required', 'in:active,inactive'],
-            'role' => ['required', Rule::enum(UserRoleEnum::class)]
-        ]);
-
-        $data['password'] = $this->generateRandomPassword(8);
-        $data['status'] = $data['status'] === 'active' ? 1 : 0;
-
-        $user = User::create($data);
-        // Log::alert("Your Password is `{$data['password']}` ");
-
-        Mail::to($user->email)
-            ->queue(new SendPasswordMail($user->FullName, $data['password']));
+        $data = $request->validated();
+        $result = $action->handle($data);
 
         return redirect()
             ->route('user.index')
-            ->with('message', "user `{$user->FullName}` has been Created");
+            ->with('message', "user `{$result['user']->FullName}` has been Created");
     }
 
-    public function destroy(User $user)
+    public function destroy(DeleteUserAction $action, User $user)
     {
-        $user = $user->loadCount('posts');
-        if (!$user->posts_count) {
-            $user->delete();
-            return redirect()->back()->with('message', "user `{$user->FullName}` has been deleted");
+        $result = $action->handle($user);
+
+        if (!$result['status']) {
+            return redirect()->back()
+                ->with('message', "user `{$user->FullName}` has many posts. and are you not allowad to delete ");
+        } else {
+            return redirect()->back()
+                ->with('message', "user `{$user->FullName}` has been deleted ");
         }
-        return redirect()->back()->with('message', "user `{$user->FullName}` has many posts. and are you not allowad to delete ");
     }
 
     public function edit(User $user)
@@ -78,56 +75,30 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(User $user, Request $request)
+    public function update(User $user, UpdateUserRequest $request, UpdateUserAction $action)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'min:3', 'max:100'],
-            'family' => ['required', 'string', 'min:3', 'max:100'],
-            'email' => ['required', 'email', 'max:100', 'unique:users,email'],
-            'status' => ['required', 'in:active,inactive'],
-            'role' => ['required', Rule::enum(UserRoleEnum::class)]
-        ]);
-
-        $data['status'] = $data['status'] === 'active' ? 1 : 0;
-        $user->update($data);
-
-
+        $data = $request->validated();
+        $result = $action->handle($data , $user);
 
         return redirect()
             ->route('user.index')
-            ->with('message', "user `{$user->FullName}` has been Update");
+            ->with('message', "user `{$result['user']->FullName}` has been Update");
     }
 
-    public function change(User $user)
+    public function change(ChangeUserAction $action, User $user)
     {
-        $user->status = !$user->status;
-        $user->save();
+        $action->handle($user);
 
         return redirect()
             ->back()
             ->with('message', "User {$user->FullName} has been changed. ");
     }
 
-    public function reset(User $user)
+    public function reset(ResetUserAction $action  , User $user)
     {
-        $password = $this->generateRandomPassword(8);
-        $user->password = $password;
 
-        Mail::to($user->email)
-            ->queue(new SendPasswordMail($user->FullName, $password));
-
+        $action->handle($user);
+      
         return redirect()->back()->with('message', "user {$user->FullName} has been reset");
-    }
-
-    private function generateRandomPassword($length = 12)
-    {
-        $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_';
-        $charactersLength = strlen($characters);
-        $password = '';
-
-        for ($i = 0; $i < $length; $i++) {
-            $password .= $characters[random_int(0, $charactersLength - 1)];
-        }
-        return $password;
     }
 }

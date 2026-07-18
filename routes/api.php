@@ -15,6 +15,7 @@ Route::get('category/{category}', [TemplateController::class, 'category'])->name
 Route::get('search', [TemplateController::class, 'search'])->name('api.search');
 Route::get('post/{post}', [TemplateController::class, 'single'])->name('api.single');
 Route::post('post/{post}/comment', [TemplateController::class, 'comment'])->name('api.comment');
+Route::get('topic', [TemplateController::class, 'topic'])->name('api.topic');
 
 Route::middleware('guest:sanctum')->group(function () {
     Route::post('login', [AuthController::class, 'authenticate'])->name('api.authenticate');
@@ -45,14 +46,12 @@ Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
     Route::put('comment/{comment}', [CommentController::class, 'update'])->name('api.comment.update');
     Route::delete('comment/{comment}', [CommentController::class, 'destroy'])->name('api.comment.destroy');
 
-    Route::get('user/', [UserController::class, 'index'])->name('user.index');
-    Route::get('user/create', [UserController::class, 'create'])->name('user.create');
+    Route::get('user/', [UserController::class, 'index'])->name('spi.user.index');
     Route::post('user', [UserController::class, 'store'])->name('user.store');
-    Route::delete('user/{user}', [UserController::class, 'destroy'])->name('user.destroy');
-    Route::get('user/{user}/edit', [UserController::class, 'edit'])->name('user.edit');
-    Route::put('user/{user}', [UserController::class, 'update'])->name('user.update');
-    Route::patch('user/{user}/change', [UserController::class, 'change'])->name('user.change');
-    Route::patch('user/{user}/reset', [UserController::class, 'reset'])->name('user.reset');
+    Route::delete('user/{user}', [UserController::class, 'destroy'])->name('spi.user.destroy');
+    Route::put('user/{user}', [UserController::class, 'update'])->name('spi.user.update');
+    Route::patch('user/{user}/change', [UserController::class, 'change'])->name('spi.user.change');
+    Route::patch('user/{user}/reset', [UserController::class, 'reset'])->name('spi.user.reset');
 
 
     Route::put('profile', [AuthController::class, 'updateprofile'])->name('apu.profile.update');

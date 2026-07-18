@@ -82,3 +82,5 @@ class AuthController extends Controller
         return Redirect::route('login');
     }
 }
+
+ 

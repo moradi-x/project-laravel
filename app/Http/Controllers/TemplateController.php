@@ -97,58 +97,20 @@ class TemplateController extends Controller
         ]);
     }
 
-
-    // public function comment(int $id, Request $request)
-    // {
-
-    //     $data = $request->validate([
-    //         'name' => ['required', 'string', 'min:3', 'max:50'],
-    //         'email' => ['required', 'email', 'string', 'max:100'],
-    //         'comment' => ['required', 'string', 'min:3', 'max:10000'],
-    //         'captcha' => ['required', 'captcha']
-    //     ]);
-
-
-    //     $throttlekey = $request->ip;
-
-    //     if (RateLimiter::tooManyAttempts($throttlekey, 2)) {
-    //         throw ValidationException::withMessages([
-    //             'name' => [__('too many login attempts . please try again in :seconds seconds. ', [
-    //                 'seconds' => RateLimiter::availableIn($throttlekey)
-    //             ])],
-    //         ]);
-    //     }
-
-    //     RateLimiter::hit($throttlekey, 60);
-
-
-    //     $post = Post::where('status', true)
-    //         ->where('id', $id)
-    //         ->firstOrFail();
-
-    //     $data['status'] = CommentStatusEnum::PENDING;
-
-    //     $comment = $post->comments()->create($data);
-    //     $user = User::find(1);
-    //     Notification::send($user, new CommentNotification($comment));
-
-    //     return Redirect::back()
-    //         ->with('message', "Comment was posted and show after accept by admin")
-    //         ->withFragment('comment');
-    // }
-
-
     public function comment(string $slug, CreateCommentAction $action, StoreCommentRequest $request)
     {
 
-        $data = $request->validated(); 
+        $data = $request->validated();
 
         $throttlekey = $request->ip();
 
-        $result = $action->handle($slug ,$data , $throttlekey);
+        $result = $action->handle($slug, $data, $throttlekey);
 
         return Redirect::back()
             ->with($result['message'])
             ->withFragment('comment');
-    } 
+    }
+
+
+    
 }
