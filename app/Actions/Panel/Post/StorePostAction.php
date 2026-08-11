@@ -19,7 +19,8 @@ class StorePostAction
             $slug = $slug . "-" . uniqid();
 
 
-        $thumbnail = $data['thumbnail']->store(); 
+        // $thumbnail = $data['thumbnail']->store(); 
+        $thumbnail = $data['thumbnail']->store('images', 'public');
         // $thumbnail = "image.jpg"; 
          // مرحله دوم ذخیره عکس در پوشه استوریج . اپ . پاپلیک
 
@@ -32,6 +33,7 @@ class StorePostAction
             'content' => $data['content'],
             'status' => $data['status'] == 'active' ? true : false,
             'thumbnail' => "storage/{$thumbnail}",  // مرحله سوم ذخیره مسیر در دیتابیس
+            // 'thumbnail' => $thumbnail,
         ]);
 
         $post->categories()->attach($data['categories']);

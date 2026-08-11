@@ -33,7 +33,8 @@ class PostController extends Controller
 
 
         return View::make('admins.post.index', [
-            'posts' => PostCollection::make($result['posts'])
+            // 'posts' => PostCollection::make($result['posts'])
+            'posts' => $result['posts']
         ]);
     }
 

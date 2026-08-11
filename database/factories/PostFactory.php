@@ -15,7 +15,8 @@ class PostFactory extends Factory
 
         $title = $this->faker->unique()->sentence ;
         $uploadImage = UploadedFile::fake()->image(public_path('images/test.jpg'),640,480);
-        $thumbnail = $uploadImage->store();
+        // $thumbnail = $uploadImage->store();
+        $thumbnail = $uploadImage->store('images', 'public');
 
         return [
             'title' => $title,

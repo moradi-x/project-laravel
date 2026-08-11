@@ -69,10 +69,17 @@
                                     </td>
                                     <td class="py-3 px-4 border-b">{{ $post->created_at->format('d M Y - l | H:m') }}
                                     </td>
-                                                                            <td class=" flex py-3 px-4 border-b text-right space-x-2 ">
+                                    <td class=" flex py-3 px-4 border-b text-right space-x-2 ">
 
-                                    @if (request('trash'))
+                                        {{-- @php
+                                            $user = auth()->user();
+                                            $policy = app(\App\Policies\postPolicy::class);
+                                        @endphp
 
+                                        {{ dd($policy->update($user, $post), $policy->delete($user, $post)) }} --}}
+
+
+                                        @if (request('trash'))
                                             @can('restore', $post)
                                                 <button type="button"
                                                     onclick="restoreItem({{ $post->id }}, '{{ $post->title }}')"
@@ -129,7 +136,7 @@
                                                     </form>
                                                 @endcan
                                             </div>
-                                    @endif
+                                        @endif
 
                                     </td>
                                 </tr>
