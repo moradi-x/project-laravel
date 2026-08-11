@@ -2,7 +2,47 @@
 
 A full-featured blog application built with **Laravel**, **MySQL**, **HTML**, **CSS**, and **REST API**.
 
-The project includes a public blog, authentication and authorization, a complete admin panel, API resources, background jobs, real-time features, and CRUD management for the main entities.
+This project includes a public blog, authentication and authorization, a complete admin panel, CRUD operations, API resources, background jobs, email services, and real-time features.
+
+---
+
+## 📸 Screenshots
+
+### 🌐 Frontend
+
+#### Home
+![Home](screenshots/home.png)
+
+#### Blog
+![Blog](screenshots/blog.png)
+
+#### Single Post
+![Single Post](screenshots/single.png)
+
+#### Login
+![Login](screenshots/login.png)
+
+#### Register
+![Register](screenshots/register.png)
+
+---
+
+### 🧑‍💻 Admin Panel
+
+#### Posts
+![Posts](screenshots/post.png)
+
+#### Categories
+![Categories](screenshots/categorie.png)
+
+#### Comments
+![Comments](screenshots/comment.png)
+
+#### Users
+![Users](screenshots/user.png)
+
+#### Profile
+![Profile](screenshots/profile.png)
 
 ---
 
@@ -12,7 +52,7 @@ The project includes a public blog, authentication and authorization, a complete
 |---|---|
 | 🔐 Authentication & Authorization | User authentication with authorization and access control |
 | 🛡️ Policies & Gates | Secure access to protected resources and actions |
-| 📝 Blog Management | Create, read, update, and delete blog posts |
+| 📝 Blog Management | Full CRUD operations for blog posts |
 | 📂 Category Management | Full CRUD operations for categories |
 | 💬 Comment Management | Manage and moderate comments |
 | 👤 User Management | Admin management of registered users |
@@ -22,12 +62,11 @@ The project includes a public blog, authentication and authorization, a complete
 | 📄 Pagination | Paginated lists for better performance and usability |
 | 🖼️ Image Processing | Image upload and editing functionality |
 | 📧 Email Notifications | Email sending and notification functionality |
-| ⚙️ Queues & Jobs | Background processing for emails and time-consuming tasks |
+| ⚙️ Queues & Jobs | Background processing for emails and other tasks |
 | 🔑 Password Management | Password change and random password generation via email |
-| 👤 User Profile | Profile management with personal information and avatar |
-| 🧩 REST API | API endpoints built with Laravel API Resources and Collections |
+| 👤 User Profile | Profile and avatar management |
+| 🧩 REST API | API built with Laravel Resources and Collections |
 | ⚡ Real-Time Features | Real-time functionality implemented in the application |
-| 🧱 Admin Panel | Dedicated panel for managing application data |
 | 🛡️ CAPTCHA | CAPTCHA protection for selected forms |
 
 ---
@@ -46,53 +85,64 @@ The project includes a public blog, authentication and authorization, a complete
 
 ---
 
-## 📸 Screenshots
+## 🔌 API
 
-### Frontend
+The project provides REST API endpoints using **Laravel API Resources and Collections**.
 
-#### Home
-
-![Home](screenshots/home.png)
-
-#### Blog
-
-![Blog](screenshots/blog.png)
-
-#### Single Post
-
-![Single Post](screenshots/single.png)
-
-#### Login
-
-![Login](screenshots/login.png)
-
-#### Register
-
-![Register](screenshots/register.png)
+API responses are structured through dedicated resources and collections and handled by their corresponding controllers.
 
 ---
 
-### Admin Panel
+## 🧑‍💻 Admin Panel
 
-#### Posts
+The admin panel provides management functionality for:
 
-![Posts](screenshots/admin-posts.png)
+- Posts
+- Categories
+- Comments
+- Users
+- Profiles
 
-#### Categories
+Each major entity supports CRUD operations along with:
 
-![Categories](screenshots/admin-categories.png)
+- Search
+- Status management
+- Soft deletes
+- Pagination
 
-#### Comments
+---
 
-![Comments](screenshots/admin-comments.png)
+## ⚡ Background Processing
 
-#### Users
+The application uses **Jobs and Queues** to handle background tasks such as email processing and other time-consuming operations.
 
-![Users](screenshots/admin-users.png)
+This helps keep the application responsive by moving heavy tasks to the background.
 
-#### Profile
+---
 
-![Profile](screenshots/profile.png)
+## 🔐 Security
+
+The project uses several Laravel security features, including:
+
+- Authentication
+- Authorization
+- Policies
+- Gates
+- CAPTCHA
+- Protected admin routes
+
+---
+
+## 👤 User Profile
+
+Users can manage their personal profile, including:
+
+- Profile information
+- Profile image
+- Password
+- Password recovery
+
+A randomly generated password can also be sent to the user's email when required.
 
 ---
 
