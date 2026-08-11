@@ -8,7 +8,7 @@ This project includes a public blog, authentication and authorization, a complet
 
 ## 📸 Screenshots
 
-### 🌐 Useer Panel
+### 🌐 User Panel
 
 #### Home
 ![Home](screenshots/home.png)
@@ -23,7 +23,7 @@ This project includes a public blog, authentication and authorization, a complet
 ![Login](screenshots/login.png)
 
 #### Register
-![Register](screenshots/register.png)
+![Register](screenshots/regester.png)
 
 ---
 
